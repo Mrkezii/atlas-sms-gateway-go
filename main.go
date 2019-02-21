@@ -32,24 +32,26 @@ type Sms struct {
 }
 
 // SendSMS is to send the SMS
-func (s *Client) SendSMS(sms *Sms) error {
-	url := fmt.Sprintf(baseURL, s.Username)
+func (s *Client) SendSMS(sms *Sms) ([]byte, error) {
+	url := baseURL
 	fmt.Println(url)
 	j, err := json.Marshal(sms)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	fmt.Println(string(j))
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(j))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = s.doRequest(req)
-	return err
+	resp, err := s.doRequest(req)
+	return resp, err
 }
 
 // doRequest actually does the sendin
 func (s *Client) doRequest(req *http.Request) ([]byte, error) {
 	req.SetBasicAuth(s.Username, s.Password)
+	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
